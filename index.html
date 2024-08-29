@@ -59,17 +59,6 @@
     .then(data => {
       if (data.access_token) {
         document.getElementById('message').innerText = 'Access token received: ' + data.access_token;
-
-        // Use the access token to fetch user information
-        fetch('https://api.github.com/user', {
-          headers: {
-            'Authorization': 'Bearer ' + data.access_token
-          }
-        })
-        .then(response => response.json())
-        .then(user => {
-          document.getElementById('message').innerText += '\n\nHello, ' + user.login;
-        });
       } else {
         document.getElementById('message').innerText = 'Failed to get access token';
       }
