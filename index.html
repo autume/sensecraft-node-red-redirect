@@ -27,11 +27,59 @@
       font-size: 3em;
       margin: 0;
     }
+    #message {
+      margin-top: 20px;
+      font-size: 1.2em;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
 <div class="welcome-container">
   <h1>Welcome to SenseCraft!</h1>
+  <div id="message">Processing...</div>
 </div>
+<script>
+  // Extract the authorization code from the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+
+  if (code) {
+    document.getElementById('message').innerText = 'Authorization code received: ' + code;
+
+    // Exchange the authorization code for an access token
+    fetch('https://sensecraft-node-red-oauth.sensecraft.ai/exchange-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ code: code })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.access_token) {
+        document.getElementById('message').innerText = 'Access token received: ' + data.access_token;
+
+        // Use the access token to fetch user information
+        fetch('https://api.github.com/user', {
+          headers: {
+            'Authorization': 'Bearer ' + data.access_token
+          }
+        })
+        .then(response => response.json())
+        .then(user => {
+          document.getElementById('message').innerText += '\n\nHello, ' + user.login;
+        });
+      } else {
+        document.getElementById('message').innerText = 'Failed to get access token';
+      }
+    })
+    .catch(error => {
+      document.getElementById('message').innerText = 'Error: ' + error.message;
+    });
+  } else {
+    document.getElementById('message').innerText = 'No authorization code found';
+  }
+</script>
 </body>
 </html>
